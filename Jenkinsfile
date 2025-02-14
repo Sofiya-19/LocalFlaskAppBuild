@@ -10,16 +10,6 @@ pipeline {
             } 
         } 
 
-        stage('Install Dependencies') {
-            steps {
-                sh '''
-                apk update
-                apk add --no-cache python3 py3-pip  # No sudo needed
-                '''
-                echo "Flask and dependencies installed successfully."
-            }
-        }
-
         stage('Stop Previous Flask Instance') {
             steps {
                 sh 'pkill -f app.py || true'  

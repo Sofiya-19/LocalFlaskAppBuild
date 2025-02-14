@@ -13,11 +13,10 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                apk add --no-cache python3 py3-pip
-                python3 -m venv venv
-                . venv/bin/activate && pip install --no-cache-dir -r LocalFlaskAppBuild/requirements.txt
+                apk update
+                apk add --no-cache python3 py3-pip  # No sudo needed
                 '''
-                echo "Dependencies installed successfully."
+                echo "Flask and dependencies installed successfully."
             }
         }
 
@@ -32,7 +31,6 @@ pipeline {
             steps { 
                 dir('LocalFlaskAppBuild') { 
                     sh '''
-                    . ../venv/bin/activate
                     python3 app.py > flask.log 2>&1 &
                     ''' 
                     sh 'tail -f flask.log' 
@@ -44,7 +42,7 @@ pipeline {
     post { 
         always { 
             emailext ( 
-                to: 'sofiyabalamurugan@gmail.com', 
+                to: 'sofiyabg.aids2021@citchennai.net', 
                 subject: "Jenkins Build Status: ${currentBuild.currentResult}", 
                 body: """Build Summary:
                 - Job Name: ${env.JOB_NAME} 

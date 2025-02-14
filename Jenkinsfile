@@ -13,8 +13,8 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                apk add --no-cache python3 py3-pip  # Install Python3 and pip
-                python3 -m venv venv  # Create virtual environment
+                apk add --no-cache python3 py3-pip
+                python3 -m venv venv
                 . venv/bin/activate && pip install --no-cache-dir -r LocalFlaskAppBuild/requirements.txt
                 '''
                 echo "Dependencies installed successfully."
@@ -23,7 +23,8 @@ pipeline {
 
         stage('Stop Previous Flask Instance') {
             steps {
-                sh 'pkill -f app.py || true'  # Stops any running Flask app to avoid port conflicts
+                sh 'pkill -f app.py || true'  
+                echo "Stopped any running Flask instances to avoid port conflicts."
             }
         }
 

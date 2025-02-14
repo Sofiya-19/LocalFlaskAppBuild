@@ -1,30 +1,38 @@
-pipeline {
-    agent any
+pipeline { 
+    agent { label 'docker-agent' } 
 
-    stages {
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/Sofiya-19/LocalFlaskAppBuild.git'
-            }
-        }
+    stages { 
+        stage('Clone Repository') { 
+            steps { 
+                sh 'rm -rf LocalFlaskAppBuild || true' 
+                sh 'git clone https://github.com/Sofiya-19/LocalFlaskAppBuild.git' 
+                echo "Repository cloned successfully." 
+            } 
+        } 
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'pip install -r requirements.txt'
-            }
-        }
+        stage('Run') { 
+            steps { 
+                dir('LocalFlaskAppBuild') { 
+                    sh 'python3 app.py > flask.log 2>&1 &' 
+                    sh 'tail -f flask.log' 
+                } 
+            } 
+        } 
+    } 
 
-        stage('Stop Previous Flask') {
-            steps {
-                sh 'pkill -f app.py || true'
-            }
-        }
-
-
-        stage('Run Flask App') {
-            steps {
-                sh 'nohup python3 app.py &'
-            }
-        }
-    }
+    post { 
+        always { 
+            emailext ( 
+                to: 'sofiyabalamurugan@gmail.com', 
+                subject: "Jenkins Build Status: ${currentBuild.currentResult}", 
+                body: """Build Summary:
+                - Job Name: ${env.JOB_NAME} 
+                - Build Number: ${env.BUILD_NUMBER} 
+                - Build Status: ${currentBuild.currentResult} 
+                - Build URL: ${env.BUILD_URL} 
+                """, 
+                mimeType: 'text/plain' 
+            ) 
+        } 
+    } 
 }
